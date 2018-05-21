@@ -99,11 +99,10 @@ THStack* getStack(TH2D* histo, TH1D** histos, float lower, float upper,char* nam
 }
 
  
-void drawStacks(TH2D* phase2Histo, TH2D* phase3Histo, bool isPhi,float scaleFactorPhase2, float scaleFactorPhase3)
+void drawStacks(TH2D* Histo, bool isPhi,float scaleFactor, char* filenameAdd)
 {
   char buffer[300];
-  TH1D** histosPhase2=new TH1D*[8];
-  TH1D** histosPhase3=new TH1D*[8];
+  TH1D** histos=new TH1D*[8];
 
   int numBinsX2=0;
   int numBinsX3=0;
@@ -112,62 +111,45 @@ void drawStacks(TH2D* phase2Histo, TH2D* phase3Histo, bool isPhi,float scaleFact
   if(isPhi)
     lowerBound=-TMath::Pi();
 
-  THStack* phase2Stack=getStack(phase2Histo,histosPhase2,lowerBound,TMath::Pi(),"Phase2",scaleFactorPhase2,numBinsX2,false);
-  THStack* phase3Stack=getStack(phase3Histo,histosPhase3,lowerBound,TMath::Pi(),"Phase3",scaleFactorPhase3,numBinsX3,false);
+  THStack* Stack=getStack(Histo,histos,lowerBound,TMath::Pi(),filenameAdd,scaleFactor,numBinsX2,false);
+
 
   TCanvas c;
-  phase2Stack->Draw();
-  TLegend* legendPhase2=getLegend(histosPhase2);
-  //  int numBinsX2=phase2Stack->GetNbinsX();
+  Stack->Draw();
+  TLegend* legend=getLegend(histos);
+    int numBinsX=Histo->GetNbinsX();
   //  int numBinsX3=phase2Stack->GetNbinsX();
-  cout <<"phase 2 has " << numBinsX2 <<" phase2: "<< numBinsX3 <<endl;
+    cout <<"phase 2 has " << numBinsX2 <<" phase2: "<< numBinsX3 <<endl;
 
-  float rate2=1000.0/(50*1.8*scaleFactorPhase2);  //HZ 
-  float rate3=1000.0/(50*1.8*scaleFactorPhase3);  //HZ 
+  float rate=1000.0/(50*1.8*scaleFactor);  //HZ 
 
-  float rad2=(TMath::Pi()-lowerBound)/numBinsX2;
-  float rad3=(TMath::Pi()-lowerBound)/numBinsX3;
+  float rad=(TMath::Pi()-lowerBound)/numBinsX;
 
-  sprintf(buffer,"%.3f HZ/%.2f rad",rate2,rad2);
-  phase2Stack->GetYaxis()->SetRangeUser(0,4000);
-  phase2Stack->GetYaxis()->SetTitle(buffer);
+
+  sprintf(buffer,"%.3f HZ/%.2f rad",rate,rad);
+  Stack->GetYaxis()->SetRangeUser(0,4000);
+  Stack->GetYaxis()->SetTitle(buffer);
   if(isPhi)
-    phase2Stack->GetXaxis()->SetTitle("#phi [rad]");
+    Stack->GetXaxis()->SetTitle("#phi [rad]");
   else
-    phase2Stack->GetXaxis()->SetTitle("#theta [rad]");
+    Stack->GetXaxis()->SetTitle("#theta [rad]");
 
   c.Update();
-  phase2Stack->Draw();
+  Stack->Draw();
   c.Update();
-  legendPhase2->Draw();
+  legend->Draw();
   if(isPhi)
-    c.SaveAs("phase2Stack_phi.png");
+    sprintf(buffer,"Stack_phi%s.png",filenameAdd);
   else
-    c.SaveAs("phase2Stack_theta.png");
-
-  phase3Stack->Draw();
-  phase3Stack->GetYaxis()->SetRangeUser(0,4000);
-  sprintf(buffer,"%.3f HZ/%.2f rad",rate3,rad3);
-  phase3Stack->GetXaxis()->SetTitle("#theta [rad]");
-  if(isPhi)
-    phase3Stack->GetXaxis()->SetTitle("#phi [rad]");
-
-  phase3Stack->GetYaxis()->SetTitle(buffer);
-  c.Update();
-  TLegend* legendPhase3=getLegend(histosPhase3);
-  legendPhase3->Draw();
-  if(isPhi)
-    c.SaveAs("phase3Stack_phi.png");
-  else
-    c.SaveAs("phase3Stack_theta.png");
-
+    sprintf(buffer,"Stack_theta%s.png",filenameAdd);
+  c.SaveAs(buffer);
 
 }
 
-void drawStacksVsLayer(TH2D* phase2Histo, TH2D* phase3Histo, float scaleFactorPhase2, float scaleFactorPhase3, bool is2D=false)
+void drawStacksVsLayer(TH2D* Histo, float scaleFactor,char* filenameAdd,  bool is2D=false)
 {
   char buffer[300];
-  TH1D** histosPhase2=new TH1D*[8];
+  TH1D** histos=new TH1D*[8];
   TH1D** histosPhase3=new TH1D*[8];
 
   int numBinsX2=0;
@@ -177,68 +159,57 @@ void drawStacksVsLayer(TH2D* phase2Histo, TH2D* phase3Histo, float scaleFactorPh
   float upperBound=16.0;
 
 
-  THStack* phase2Stack=getStack(phase2Histo,histosPhase2,lowerBound,upperBound,buffer,scaleFactorPhase2,numBinsX2,true,false);
+  THStack* Stack=getStack(Histo,histos,lowerBound,upperBound,buffer,scaleFactor,numBinsX2,true,false);
 
   if(is2D)
     sprintf(buffer,"Phase3_2DHits");
   else
     sprintf(buffer,"Phase3_1DHits");
-  THStack* phase3Stack=getStack(phase3Histo,histosPhase3,lowerBound,upperBound,buffer,scaleFactorPhase3,numBinsX3,true,false);
+  //  THStack* phase3Stack=getStack(phase3Histo,histosPhase3,lowerBound,upperBound,buffer,scaleFactorPhase3,numBinsX3,true,false);
 
 
   TCanvas c;
-  phase2Stack->Draw();
-  TLegend* legendPhase2=getLegend(histosPhase2,true);
-  //  int numBinsX2=phase2Stack->GetNbinsX();
-  //  int numBinsX3=phase2Stack->GetNbinsX();
-  cout <<"phase 2 has " << numBinsX2 <<" phase2: "<< numBinsX3 <<endl;
+  Stack->Draw();
+  TLegend* legend=getLegend(histos,true);
+  //  int numBinsX2=Stack->GetNbinsX();
+  //  int numBinsX3=Stack->GetNbinsX();
+  cout <<"phase 2 has " << numBinsX2 <<" : "<< numBinsX3 <<endl;
 
-  float rate2=1000.0/(50*1.8*scaleFactorPhase2);  //HZ 
-  float rate3=1000.0/(50*1.8*scaleFactorPhase3);  //HZ 
+  float rate=1000.0/(50*1.8*scaleFactor);  //HZ 
 
-  sprintf(buffer,"%.3f HZ/layer",rate2);
-  phase2Stack->GetYaxis()->SetRangeUser(0,4000);
-  phase2Stack->GetYaxis()->SetTitle(buffer);
-  phase2Stack->GetXaxis()->SetTitle("layer");
+  sprintf(buffer,"%.3f HZ/layer",rate);
+  Stack->GetYaxis()->SetRangeUser(0,4000);
+  Stack->GetYaxis()->SetTitle(buffer);
+  Stack->GetXaxis()->SetTitle("layer");
 
   c.Update();
-  phase2Stack->Draw();
+  Stack->Draw();
   c.Update();
-  legendPhase2->Draw();
+  legend->Draw();
+
   if(is2D)
-    c.SaveAs("phase2Stack_layer_2DHits.png");
+    sprintf(buffer,"Stack_layer_2DHits%s.png",filenameAdd);
   else
-    c.SaveAs("phase2Stack_layer_1DHits.png");
+    sprintf(buffer,"Stack_layer_1DHits%s.png",filenameAdd);
+  c.SaveAs(buffer);
 
-  phase3Stack->Draw();
-  phase3Stack->GetYaxis()->SetRangeUser(0,4000);
-  sprintf(buffer,"%.3f HZ/layer",rate3);
-  phase3Stack->GetXaxis()->SetTitle("layer");
-  phase3Stack->GetYaxis()->SetTitle(buffer);
-  c.Update();
-  TLegend* legendPhase3=getLegend(histosPhase3,true);
-  legendPhase3->Draw();
-  if(is2D)
-    c.SaveAs("phase3Stack_layer_2DHits.png");
-  else
-    c.SaveAs("phase3Stack_layer_1DHits.png");
+
 }
 
 
 //changed this, so that only one phase at a time but we can give the filename and time constant
 //we assume 50k events
 //@time time in us
-void doAnalysis(char* filename, float time)
+void doAnalysis(char* filename, float time, char* filenameAdd)
 {
-
+  char buffer[300];
   //phase 2: scale all to 1ms: (assuming we threw 50k events, this means a factor of 556/50k
-  float scaleFactorPhase2=556.0/50000.0;
+  float scaleFactor=time/(1.8*50000.0);
   ///campaing 2.1 has varying number of generated events, each file is 50us/one exception of 25, but number of files is either
   //100 or 200
 
-
   //phase3, most data is 600us
-  float scaleFactorPhase3=333.0/50000.0;
+  //  float scaleFactorPhase3=333.0/50000.0;
   glColorTable[0]=gROOT->GetColor(kBlue);
   glColorTable[1]=gROOT->GetColor(kRed);
   glColorTable[2]=gROOT->GetColor(kYellow);
@@ -255,53 +226,52 @@ void doAnalysis(char* filename, float time)
   // bg source vs theta/phi
  //
 
-  //    TFile phase2("../campaign15_phase2/out15_phase2_sum_nakayama.root");
-    TFile phase2("../campaign15_phase2/sumCampaign15Nakayama.root");
-    TFile phase3("../campaign15_phase2/sumCampaign15Nakayama.root");
-  //out15_phase2_sum_nakayama.root
+  //    TFile ("../campaign15_/out15__sum_nakayama.root");
+  TFile phase(filename);
+    //    TFile phase3("../campaign15_/sumCampaign15Nakayama.root");
+  //out15__sum_nakayama.root
     //    TFile phase3("../campaign15_phase3/Out_sum.root");
 
-  TH2D* bgSourceVsPhi_phase2=(TH2D*)phase2.Get("bgSourceVsPhi");
-  TH2D* bgSourceVsPhi_phase3=(TH2D*)phase3.Get("bgSourceVsPhi");
+  TH2D* bgSourceVsPhi=(TH2D*)phase.Get("bgSourceVsPhi");
 
-  TH2D* bgSourceVsTheta_phase2=(TH2D*)phase2.Get("bgSourceVsTheta");
-  TH2D* bgSourceVsTheta_phase3=(TH2D*)phase3.Get("bgSourceVsTheta");
 
-  drawStacks(bgSourceVsPhi_phase2,bgSourceVsPhi_phase3,true,scaleFactorPhase2,scaleFactorPhase3);
-  drawStacks(bgSourceVsTheta_phase2,bgSourceVsTheta_phase3,false,scaleFactorPhase2,scaleFactorPhase3);
+  TH2D* bgSourceVsTheta=(TH2D*)phase.Get("bgSourceVsTheta");
+
+
+  drawStacks(bgSourceVsPhi,true,scaleFactor,filenameAdd);
+  drawStacks(bgSourceVsTheta,false,scaleFactor,filenameAdd);
 
 //
 
   //yes.... there is a misspelling in the root file
-  TH2D* bgSourceVsLayer_phase2=(TH2D*)phase2.Get("bgSourcPerLayer");
-  TH2D* bgSourceVsLayer_phase3=(TH2D*)phase3.Get("bgSourcPerLayer");
+  TH2D* bgSourceVsLayer=(TH2D*)phase.Get("bgSourcPerLayer");
+  //  TH2D* bgSourceVsLayer_phase3=(TH2D*)phase3.Get("bgSourcPerLayer");
 
-  drawStacksVsLayer(bgSourceVsLayer_phase2,bgSourceVsLayer_phase3,scaleFactorPhase2,scaleFactorPhase3);
+  drawStacksVsLayer(bgSourceVsLayer,scaleFactor, filenameAdd);
 
-  bgSourceVsLayer_phase2=(TH2D*)phase2.Get("bgSourcPerLayer2D");
-  bgSourceVsLayer_phase3=(TH2D*)phase3.Get("bgSourcPerLayer2D");
+  bgSourceVsLayer=(TH2D*)phase.Get("bgSourcPerLayer2D");
 
-  drawStacksVsLayer(bgSourceVsLayer_phase2,bgSourceVsLayer_phase3,scaleFactorPhase2,scaleFactorPhase3,true);
+
+  drawStacksVsLayer(bgSourceVsLayer,scaleFactor,filenameAdd,true);
 
 
   ///normalized and draw the hits per channel and layer:
-  TH2D* posPerChannelLayerPhase2=(TH2D*)phase2.Get("posPerChannelLayer");
-  TH2D* posPerChannelLayerPhase3=(TH2D*)phase3.Get("posPerChannelLayer");
-  posPerChannelLayerPhase2->GetXaxis()->SetRangeUser(0,3500);
-  posPerChannelLayerPhase3->GetXaxis()->SetRangeUser(0,3500);
-  posPerChannelLayerPhase2->SetStats(0);
-  posPerChannelLayerPhase3->SetStats(0);
+  TH2D* posPerChannelLayer=(TH2D*)phase.Get("posPerChannelLayer");
+
+  posPerChannelLayer->GetXaxis()->SetRangeUser(0,3500);
+  posPerChannelLayer->SetStats(0);
+
 
   //let's scale this so the plot is in HZ: 50k events * 1.8 us = 0.09s
-  posPerChannelLayerPhase2->Scale(1.0/0.09);
-  posPerChannelLayerPhase3->Scale(1.0/0.09);
+  posPerChannelLayer->Scale(1.0/0.09);
   TCanvas c;
-    c.SetLogz();
+  c.SetLogz();
 
-  posPerChannelLayerPhase2->Draw("colz");
-  c.SaveAs("PosPerChannelLayerPhase2.png");
-  posPerChannelLayerPhase3->Draw("colz");
-  c.SaveAs("PosPerChannelLayerPhase3.png");
+  sprintf(buffer,"PosPerChannelLayer%s.png",filenameAdd);
+
+  posPerChannelLayer->Draw("colz");
+  c.SaveAs(buffer);
+
 
 
 };
